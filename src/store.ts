@@ -1,5 +1,5 @@
 import { writable, type Writable } from "svelte/store";
-import type { TToast } from "./types";
+import type { TLetterState, TToast } from "./types";
 
 export const toasts: Writable<TToast[]> = writable([]);
 
@@ -20,3 +20,5 @@ export const addToast = (toast: TToast) => {
 export const dismissToast = (id: number) => {
   toasts.update((all) => all.filter((t) => t.id !== id));
 };
+
+export const letterStates: Writable<TLetterState> = writable({});

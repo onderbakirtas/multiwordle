@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import { LetterState } from "../constants";
-  import { addToast } from "../store";
+  import { addToast, letterStates } from "../store";
   import { allWords } from "../words";
 
   const answer = "miray";
@@ -19,8 +19,6 @@
     [LetterState.ABSENT]: "⬜",
     [LetterState.INITIAL]: null,
   };
-
-  let letterStates = {};
 
   let currentRowIndex = 0;
   let grid = "";
@@ -81,7 +79,7 @@
       currentRow.forEach((tile, i) => {
         if (answerLetters[i] === tile.letter) {
           tile.state = LetterState.CORRECT;
-          letterStates[tile.letter] = LetterState.CORRECT;
+          $letterStates[tile.letter] = LetterState.CORRECT;
 
           answerLetters[i] = null;
         }
@@ -96,8 +94,8 @@
           console.log(tile);
           tile.state = LetterState.PRESENT;
           answerLetters[answerLetters.indexOf(tile.letter)] = null;
-          if (!letterStates[tile.letter]) {
-            letterStates[tile.letter] = LetterState.PRESENT;
+          if (!$letterStates[tile.letter]) {
+            $letterStates[tile.letter] = LetterState.PRESENT;
           }
         }
       });
@@ -105,8 +103,8 @@
       currentRow.forEach((tile) => {
         if (!tile.state) {
           tile.state = LetterState.ABSENT;
-          if (!letterStates[tile.letter]) {
-            letterStates[tile.letter] = LetterState.ABSENT;
+          if (!$letterStates[tile.letter]) {
+            $letterStates[tile.letter] = LetterState.ABSENT;
           }
         }
       });
