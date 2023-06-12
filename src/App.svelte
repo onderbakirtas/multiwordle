@@ -1,9 +1,11 @@
 <script lang="ts">
+  import Board from "./lib/Board.svelte";
   import Keyboard from "./lib/Keyboard.svelte";
 </script>
 
 <main>
   <h1>wordle.px</h1>
+  <Board />
   <Keyboard />
 </main>
 
