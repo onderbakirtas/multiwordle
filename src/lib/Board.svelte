@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import { LetterState } from "../constants";
+  import { addToast } from "../store";
   import { allWords } from "../words";
 
   const answer = "miray";
@@ -152,6 +153,7 @@
 
   function shake() {
     shakeRowIndex = currentRowIndex;
+    addToast({ message: "Kelime listesinde yok" });
     setTimeout(() => {
       shakeRowIndex = -1;
     }, 1000);

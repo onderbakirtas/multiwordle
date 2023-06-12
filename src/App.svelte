@@ -1,6 +1,7 @@
 <script lang="ts">
   import Board from "./lib/Board.svelte";
   import Keyboard from "./lib/Keyboard.svelte";
+  import ToastProvider from "./lib/ToastProvider.svelte";
 </script>
 
 <main>
@@ -8,6 +9,8 @@
   <Board />
   <Keyboard />
 </main>
+
+<ToastProvider />
 
 <style>
   main {
