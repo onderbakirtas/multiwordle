@@ -56,3 +56,21 @@ body {
   padding: 0;
   overflow-y: hidden;
 }
+
+.absent,
+.present,
+.correct {
+  color: var(--white) !important;
+}
+
+.correct {
+  background-color: var(--green) !important;
+}
+
+.present {
+  background-color: var(--yellow) !important;
+}
+
+.absent {
+  background-color: var(--gray) !important;
+}

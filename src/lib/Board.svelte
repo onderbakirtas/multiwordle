@@ -235,18 +235,6 @@
     color: var(--color-tone-1);
   }
 
-  .correct {
-    background-color: var(--green);
-  }
-
-  .present {
-    background-color: var(--yellow);
-  }
-
-  .absent {
-    background-color: var(--gray);
-  }
-
   .tile.filled {
     /* border: 2px solid var(--color-tone-2); */
     animation: zoom 0.1s ease-in-out;

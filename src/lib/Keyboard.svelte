@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { letterStates } from "../store";
   import IconBackspace from "./IconBackspace.svelte";
 
   const keys = [
@@ -16,13 +17,22 @@
       {/if}
       {#each row as key}
         {#if key === "Enter"}
-          <button type="button" class="big">{key}</button>
+          <button type="button" class="big">
+            {key}
+          </button>
         {:else if key === "Backspace"}
           <button type="button" class="big">
             <IconBackspace />
           </button>
         {:else}
-          <button type="button">{key}</button>
+          <button
+            type="button"
+            class:present={$letterStates[key] === "present"}
+            class:absent={$letterStates[key] === "absent"}
+            class:correct={$letterStates[key] === "correct"}
+          >
+            {key}
+          </button>
         {/if}
       {/each}
       {#if i === 1}
@@ -69,6 +79,7 @@
     justify-content: center;
     align-items: center;
     -webkit-tap-highlight-color: rgba(0, 0, 0, 0.3);
+    transition: all 0.2s 1.5s;
   }
 
   button:last-of-type {
