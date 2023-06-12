@@ -9,7 +9,7 @@
   const board = Array.from({ length: 6 }, () =>
     Array.from({ length: 5 }, () => ({
       letter: "",
-      state: LetterState.INITIAL,
+      state: null,
     }))
   );
 
@@ -20,10 +20,9 @@
     [LetterState.INITIAL]: null,
   };
 
-  const letterStates = {};
+  let letterStates = {};
 
   let currentRowIndex = 0;
-  let message = "";
   let grid = "";
   let shakeRowIndex = -1;
   let success = false;
@@ -37,7 +36,7 @@
     if (!allowInput) return;
 
     if (/^[a-zA-ZĞğÜüŞşİıÖöÇç]$/.test(key)) {
-      fillTile(key.toLowerCase());
+      fillTile(key.toLocaleLowerCase("tr-TR"));
     } else if (key === "Backspace") {
       clearTile();
     } else if (key === "Enter") {
@@ -72,23 +71,29 @@
       const guess = currentRow.map((tile) => tile.letter).join("");
       if (!allWords.includes(guess) && guess !== answer) {
         shake();
-        showMessage(`Kelime listesinde yok`);
+        addToast({ message: "Kelime listesinde yok" });
         return;
       }
 
       const answerLetters: (string | null)[] = answer.split("");
 
-      console.log(answerLetters);
       // first pass: mark correct ones
       currentRow.forEach((tile, i) => {
         if (answerLetters[i] === tile.letter) {
-          tile.state = letterStates[tile.letter] = LetterState.CORRECT;
+          tile.state = LetterState.CORRECT;
+          letterStates[tile.letter] = LetterState.CORRECT;
+
           answerLetters[i] = null;
         }
       });
+
+      console.log(currentRow);
+
       // second pass: mark the present
       currentRow.forEach((tile) => {
+        console.log(tile.state);
         if (!tile.state && answerLetters.includes(tile.letter)) {
+          console.log(tile);
           tile.state = LetterState.PRESENT;
           answerLetters[answerLetters.indexOf(tile.letter)] = null;
           if (!letterStates[tile.letter]) {
@@ -106,25 +111,29 @@
         }
       });
 
+      board[currentRowIndex] = [...currentRow];
+
       allowInput = false;
       if (currentRow.every((tile) => tile.state === LetterState.CORRECT)) {
         // yay!
         setTimeout(() => {
           grid = genResultGrid();
-          showMessage(
-            [
-              "Genius",
-              "Magnificent",
-              "Impressive",
-              "Splendid",
-              "Great",
-              "Phew",
-            ][currentRowIndex],
-            -1
-          );
+          // showMessage(
+          //   [
+          //     "Genius",
+          //     "Magnificent",
+          //     "Impressive",
+          //     "Splendid",
+          //     "Great",
+          //     "Phew",
+          //   ][currentRowIndex],
+          //   -1
+          // );
           success = true;
         }, 1600);
       } else if (currentRowIndex < board.length - 1) {
+        console.log("next row");
+
         // go the next row
         currentRowIndex++;
         setTimeout(() => {
@@ -132,28 +141,16 @@
         }, 1600);
       } else {
         // game over :(
-        setTimeout(() => {
-          showMessage(answer.toUpperCase(), -1);
-        }, 1600);
+        setTimeout(() => {}, 1600);
       }
     } else {
       shake();
-      showMessage("Not enough letters");
-    }
-  }
-
-  function showMessage(msg: string, time = 1000) {
-    message = msg;
-    if (time > 0) {
-      setTimeout(() => {
-        message = "";
-      }, time);
+      addToast({ message: "Yetersiz harf" });
     }
   }
 
   function shake() {
     shakeRowIndex = currentRowIndex;
-    addToast({ message: "Kelime listesinde yok" });
     setTimeout(() => {
       shakeRowIndex = -1;
     }, 1000);
@@ -178,14 +175,31 @@
 
 <div id="board">
   {#each board as row, index}
-    <div class="row" class:shake={shakeRowIndex === index}>
-      {#each row as tile}
+    <div
+      class="row"
+      class:shake={shakeRowIndex === index}
+      class:jump={success && currentRowIndex === index}
+    >
+      {#each row as tile, j}
         <div
           class="tile"
           class:empty={tile.letter.length === 0}
           class:filled={tile.letter}
+          class:revealed={tile.state}
         >
-          {tile.letter}
+          <div class="front" style:transition-delay="{j * 300}ms">
+            {tile.letter}
+          </div>
+          <div
+            class="back"
+            class:present={tile.state === LetterState.PRESENT}
+            class:correct={tile.state === LetterState.CORRECT}
+            class:absent={tile.state === LetterState.ABSENT}
+            style:transition-delay="{j * 300}ms"
+            style:animation-delay="{j * 100}ms"
+          >
+            {tile.letter}
+          </div>
         </div>
       {/each}
     </div>
@@ -212,31 +226,73 @@
   }
 
   .tile {
-    display: inline-flex;
-    justify-content: center;
-    align-items: center;
+    width: 100%;
     font-size: 2rem;
     line-height: 2rem;
-    width: 100%;
     font-weight: bold;
     vertical-align: middle;
-    box-sizing: border-box;
-    color: var(--tile-text-color);
     text-transform: uppercase;
     user-select: none;
+    position: relative;
+    color: var(--color-tone-1);
   }
 
-  .tile.empty {
-    border: 2px solid var(--color-tone-4);
+  .correct {
+    background-color: var(--green);
+  }
+
+  .present {
+    background-color: var(--yellow);
+  }
+
+  .absent {
+    background-color: var(--gray);
   }
 
   .tile.filled {
-    border: 2px solid var(--color-tone-2);
+    /* border: 2px solid var(--color-tone-2); */
     animation: zoom 0.1s ease-in-out;
+  }
+
+  .tile .front,
+  .tile .back {
+    box-sizing: border-box;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    transition: transform 0.6s;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+  }
+
+  .tile .front {
+    border: 2px solid #d3d6da;
+  }
+  .tile.filled .front {
+    border-color: #999;
+  }
+  .tile .back {
+    transform: rotateX(180deg);
+    color: white;
+  }
+  .tile.revealed .front {
+    transform: rotateX(180deg);
+  }
+  .tile.revealed .back {
+    transform: rotateX(0deg);
   }
 
   .shake {
     animation: shake 0.5s;
+  }
+
+  .jump .tile .back {
+    animation: jump 0.5s;
   }
 
   @keyframes zoom {
@@ -281,6 +337,24 @@
     }
     100% {
       transform: translate(1px);
+    }
+  }
+
+  @keyframes jump {
+    0% {
+      transform: translateY(0px);
+    }
+    20% {
+      transform: translateY(5px);
+    }
+    60% {
+      transform: translateY(-25px);
+    }
+    90% {
+      transform: translateY(3px);
+    }
+    100% {
+      transform: translateY(0px);
     }
   }
 </style>
