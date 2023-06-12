@@ -2,7 +2,7 @@
   import IconBackspace from "./IconBackspace.svelte";
 
   const keys = [
-    ["q", "w", "e", "r", "t", "y", "u", "i", "o", "p", "ğ", "ü"],
+    ["q", "w", "e", "r", "t", "y", "u", "ı", "o", "p", "ğ", "ü"],
     ["a", "s", "d", "f", "g", "h", "j", "k", "l", "ş", "i"],
     ["Enter", "z", "x", "c", "v", "b", "n", "m", "ö", "ç", "Backspace"],
   ];
